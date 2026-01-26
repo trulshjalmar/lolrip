@@ -1,0 +1,468 @@
+:root{
+  --bg: #0f1115;
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.68);
+  --accent: #1f7aff;
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+}
+
+*{ box-sizing:border-box; }
+
+html, body{
+  height:100%;
+  overflow-x:hidden;
+}
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* HERO */
+.hero{ text-align:center; padding: 26px 16px 10px; }
+.heroRow{ display:flex; align-items:center; justify-content:center; gap: 12px; }
+.skull{ opacity:0.9; font-size: 20px; }
+.heroTitle{ margin:0; font-size: 40px; }
+.heroSub{ margin: 10px 0 0; font-size: 22px; color: rgba(255,255,255,0.86); }
+
+.brandLink{
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 14px;
+  padding: 6px 10px;
+  border: 1px solid transparent; /* så layout ikke hopper på hover */
+}
+
+.brandLink:hover{
+  border-color: rgba(31,122,255,0.30);
+  box-shadow: 0 0 0 3px rgba(31,122,255,0.10);
+}
+
+.brandLink:active{
+  transform: translateY(1px);
+}
+
+/* (valgfri) Gull/emboss — bruk kun hvis du faktisk har class="brandTitle" i HTML */
+.brandTitle{
+  background: linear-gradient(180deg, #f6e7b0 0%, #d9b35a 40%, #b7872b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.60),
+    0 6px 18px rgba(0,0,0,0.35);
+}
+
+/* SEARCH */
+.searchWrap{ max-width: 980px; margin: 10px auto 0; padding: 0 16px; }
+.searchBar{
+  display:flex; align-items:center; gap: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+.searchIcon{ opacity:0.7; }
+.searchBar input{
+  width:100%; border:none; outline:none;
+  background: transparent; color: var(--text);
+  font-size: 15px;
+}
+.searchBar:focus-within{
+  border-color: rgba(31,122,255,0.35);
+  box-shadow: 0 0 0 3px rgba(31,122,255,0.10);
+}
+
+/* LANES – bookmark style */
+.laneFilters{
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.laneBtn{
+  background: transparent;
+  border: none;
+  padding: 6px 2px;              /* mid-ish høyde */
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.70);
+
+  border-bottom: 3px solid transparent;
+
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+/* Hover – ingen bakgrunn, ingen fade */
+.laneBtn:hover{
+  color: rgba(255,255,255,0.95);
+  border-bottom-color: rgba(255,255,255,0.30);
+}
+
+/* Aktiv */
+.laneBtn.active{
+  color: rgba(255,255,255,0.95);
+  border-bottom-color: var(--accent);
+}
+
+/* MAIN */
+.main{ max-width: 1040px; margin: 16px auto 0; padding: 0 16px; }
+.page.hidden{ display:none; }
+
+/* SCROLL AREA */
+.gridWrap{
+  margin-top: 14px;
+  max-height: 560px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0;
+  scrollbar-gutter: stable;
+}
+.gridWrap{ scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.gridWrap::-webkit-scrollbar{ width: 10px; }
+.gridWrap::-webkit-scrollbar-thumb{ background: transparent; border-radius: 999px; }
+.gridWrap.isScrolling{ scrollbar-color: rgba(255,255,255,0.22) transparent; }
+.gridWrap.isScrolling::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.22); }
+
+/* CHAMP GRID */
+.championGrid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+@media (min-width: 560px){ .championGrid{ grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 820px){ .championGrid{ grid-template-columns: repeat(5, 1fr); } }
+
+.champCard{
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 4px;
+  cursor:pointer;
+  transition: transform 120ms ease;
+}
+.champCard:hover{ transform: scale(1.02); }
+
+.champIcon{
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  border-radius: 16px;
+  border: none;
+  display:block;
+}
+.champLabel{
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: rgba(255,255,255,0.88);
+  text-align:center;
+}
+
+/* FOOTER */
+.disclaimer{
+  text-align:center;
+  padding: 22px 16px 30px;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+}
+
+/* BUILD */
+.buildTop{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.chosenChamp{ display:flex; align-items:center; gap: 12px; }
+.champImg{ width: 64px; height: 64px; border-radius: 18px; border: none; }
+.champName{ margin:0; font-size: 18px; }
+.champMeta{ margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+.buildCard{
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  padding: 16px;
+}
+.buildHeader{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.buildName{ margin:0; font-size: 16px; }
+
+.section{ margin-top: 16px; }
+.section h4{ margin: 0 0 10px; }
+
+/* ITEMS */
+.itemGrid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (min-width: 860px){ .itemGrid{ grid-template-columns: repeat(6, 1fr); } }
+.itemIconWrap{ text-align:center; }
+.itemIcon{
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  border: none;
+  display:block;
+  margin: 0 auto;
+}
+.itemName{
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.80);
+  line-height: 1.2;
+}
+
+/* RUNES */
+.split{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 820px){ .split{ grid-template-columns: 1fr 1fr; } }
+
+.runeCard{
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  border-radius: 12px;
+  padding: 12px;
+}
+.runeBlock{ display:flex; flex-direction:column; gap: 10px; }
+.runeLine{ display:flex; align-items:center; gap: 10px; }
+.runeIconBig{ width: 34px; height: 34px; }
+.miniLabel{ color: rgba(255,255,255,0.78); font-weight: 750; font-size: 13px; }
+
+.runeGrid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.runePick{ display:flex; flex-direction: column; align-items:center; gap: 6px; }
+.runeIcon{ width: 44px; height: 44px; border-radius: 12px; border: none; }
+.runeName{
+  font-size: 12px;
+  color: rgba(255,255,255,0.80);
+  text-align:center;
+  line-height: 1.1;
+}
+
+/* SUMMONERS */
+.summoners{ display:flex; gap: 12px; flex-wrap: wrap; }
+.spellPill{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.spellIcon{ width: 34px; height: 34px; border-radius: 10px; border: none; }
+.spellName{ font-size: 13px; font-weight: 750; }
+
+/* ACTIONS */
+.actions{ display:flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.actionRow{ display:flex; gap: 10px; flex-wrap: wrap; }
+
+.sharePreview{
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.22);
+  color: rgba(255,255,255,0.85);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.hidden{ display:none !important; }
+
+/* BUTTONS */
+.btn{
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor:pointer;
+  font-weight: 800;
+}
+.btn.primary{
+  border-color: rgba(31,122,255,0.35);
+  background: rgba(31,122,255,0.10);
+}
+.btn.ghost{
+  border-color: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.02);
+}
+.btn:hover{ filter: brightness(1.08); }
+.btn:active{ transform: translateY(1px); }
+
+/* MODAL */
+.previewModal{
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 18px;
+}
+.modalBackdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.6);
+}
+.modalCard{
+  position: relative;
+  z-index: 2;
+  width: min(980px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(15,17,21,0.92);
+  backdrop-filter: blur(10px);
+  padding: 14px;
+}
+.modalTop{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.previewImg{
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  display:block;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.02);
+}
+.modalActions{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.previewHint{
+  margin: 10px 0 0;
+  color: rgba(255,255,255,0.65);
+  font-size: 12px;
+}
+
+/* ===================================== */
+/* DVD YES/NO DECISION OVERLAY (NEW)      */
+/* ===================================== */
+
+.decisionOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* ikke “full blackout” – bare litt dim */
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(2px);
+}
+
+.decisionBox{
+  width: min(720px, 92vw);
+  height: min(420px, 70vh);
+
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(15,17,21,0.92);
+  box-shadow: 0 20px 70px rgba(0,0,0,0.55);
+  position: relative;
+  overflow: hidden;
+}
+
+.decisionHud{
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  z-index: 2;
+
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.25);
+}
+
+.decisionTitle{
+  font-weight: 900;
+  font-size: 14px;
+  color: rgba(255,255,255,0.95);
+}
+
+.decisionSub{
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+}
+
+.decisionStage{
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* boksene */
+.dvdBox{
+  position: absolute;
+  width: 112px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  user-select: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+.dvdBox.yes{
+  border-color: rgba(31,122,255,0.35);
+  background: rgba(31,122,255,0.12);
+}
+
+.dvdBox.no{
+  border-color: rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+}
+
+.dvdPop{
+  animation: dvdPop 140ms ease forwards;
+}
+
+@keyframes dvdPop{
+  to{ transform: scale(0.85); opacity: 0; }
+}
