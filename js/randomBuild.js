@@ -7,8 +7,6 @@
    - Champion meta: emoji + role ONLY (no title like "the Sad Mummy")
    - Unique share link via URL params
    - PNG preview modal + download + copy PNG (if supported)
-   - NEW: DVD YES/NO decision before reroll (YES = reroll, NO = nothing)
-   - UPDATE: decision ALWAYS ends within MAX 4 seconds
 */
 
 const el = (id) => document.getElementById(id);
@@ -860,194 +858,6 @@ function reroll() {
   updateShareURL();
 }
 
-/* ===================================================== */
-/* DVD YES/NO DECISION (YES = reroll, NO = do nothing)    */
-/* - ALWAYS ends within MAX 4 seconds                     */
-/* ===================================================== */
-function startYesNoDVD(onYes, onNo) {
-  const overlay = document.getElementById("decisionOverlay");
-  const stage = document.getElementById("decisionStage");
-  const title = document.getElementById("decisionTitle");
-  const sub = document.getElementById("decisionSub");
-
-  if (!overlay || !stage || !title || !sub) {
-    onYes && onYes();
-    return;
-  }
-
-  stage.innerHTML = "";
-  overlay.classList.remove("hidden");
-  overlay.setAttribute("aria-hidden", "false");
-
-  // ✅ Viktig: tving layout før vi måler stage (så det blir boksen, ikke hele viewport)
-  stage.getBoundingClientRect();
-
-  title.textContent = "Reroll build?";
-  sub.textContent = "YES vs NO";
-
-  const boxes = [];
-  const yesCount = 10;
-  const noCount = 10;
-
-  const MAX_MS = 4000;        // ✅ maks 4 sek
-  const MIN_RESULT_MS = 900;  // litt tid før vi “tvinger” en vinner hvis det står stille
-
-  const startedAt = performance.now();
-
-  function rand(min, max) { return Math.random() * (max - min) + min; }
-
-  function createBox(type) {
-    const node = document.createElement("div");
-    node.className = "dvdBox " + type;
-    node.textContent = type === "yes" ? "YES" : "NO";
-
-    const w = 112;
-    const h = 56;
-
-    const rect = stage.getBoundingClientRect();
-    const x = rand(0, Math.max(0, rect.width - w));
-    const y = rand(0, Math.max(0, rect.height - h));
-
-    const speed = rand(2.2, 3.6);
-    const angle = rand(0, Math.PI * 2);
-
-    node.style.left = x + "px";
-    node.style.top = y + "px";
-
-    stage.appendChild(node);
-    boxes.push({
-      el: node,
-      type,
-      x,
-      y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      w,
-      h,
-      dead: false
-    });
-  }
-
-  for (let i = 0; i < yesCount; i++) createBox("yes");
-  for (let i = 0; i < noCount; i++) createBox("no");
-
-  let rafId = 0;
-  let last = performance.now();
-  let finished = false;
-
-  function intersects(a, b) {
-    return !(
-      a.x + a.w < b.x ||
-      a.x > b.x + b.w ||
-      a.y + a.h < b.y ||
-      a.y > b.y + b.h
-    );
-  }
-
-  function killBox(b) {
-    if (b.dead) return;
-    b.dead = true;
-    b.el.classList.add("dvdPop");
-    setTimeout(() => {
-      if (b.el && b.el.parentNode) b.el.parentNode.removeChild(b.el);
-    }, 160);
-  }
-
-  function countAlive(type) {
-    return boxes.filter(b => !b.dead && b.type === type).length;
-  }
-
-  function pickWinnerByCount() {
-    const yesAlive = countAlive("yes");
-    const noAlive = countAlive("no");
-
-    if (yesAlive > noAlive) return "yes";
-    if (noAlive > yesAlive) return "no";
-
-    // tie -> coinflip
-    return Math.random() < 0.5 ? "yes" : "no";
-  }
-
-  function finish(result) {
-    if (finished) return;
-    finished = true;
-
-    cancelAnimationFrame(rafId);
-
-    title.textContent = result === "yes" ? "YES ✅" : "NO ❌";
-    sub.textContent = result === "yes" ? "New build allowed" : "No reroll this time";
-
-    setTimeout(() => {
-      overlay.classList.add("hidden");
-      overlay.setAttribute("aria-hidden", "true");
-
-      if (result === "yes") onYes && onYes();
-      else onNo && onNo();
-    }, 650);
-  }
-
-  function tick(now) {
-    const dt = Math.min(1.5, (now - last) / 16.666);
-    last = now;
-
-    const elapsed = now - startedAt;
-    const rect = stage.getBoundingClientRect();
-
-    // ✅ hard stop ved 4 sek
-    if (elapsed >= MAX_MS) {
-      return finish(pickWinnerByCount());
-    }
-
-    for (const b of boxes) {
-      if (b.dead) continue;
-
-      b.x += b.vx * dt;
-      b.y += b.vy * dt;
-
-      if (b.x <= 0) { b.x = 0; b.vx *= -1; }
-      if (b.y <= 0) { b.y = 0; b.vy *= -1; }
-      if (b.x + b.w >= rect.width) { b.x = rect.width - b.w; b.vx *= -1; }
-      if (b.y + b.h >= rect.height) { b.y = rect.height - b.h; b.vy *= -1; }
-
-      b.el.style.left = b.x + "px";
-      b.el.style.top = b.y + "px";
-    }
-
-    // YES vs NO => begge forsvinner
-    for (let i = 0; i < boxes.length; i++) {
-      const a = boxes[i];
-      if (a.dead) continue;
-
-      for (let j = i + 1; j < boxes.length; j++) {
-        const b = boxes[j];
-        if (b.dead) continue;
-
-        if (a.type !== b.type && intersects(a, b)) {
-          killBox(a);
-          killBox(b);
-        }
-      }
-    }
-
-    const yesAlive = countAlive("yes");
-    const noAlive = countAlive("no");
-
-    if (yesAlive > 0 && noAlive === 0) return finish("yes");
-    if (noAlive > 0 && yesAlive === 0) return finish("no");
-    if (yesAlive === 0 && noAlive === 0) return finish("no");
-
-    // ✅ hvis det tar litt tid, men ikke for lenge -> la det gå,
-    // men hvis det nærmer seg maks, avgjør automatisk uansett.
-    if (elapsed >= MAX_MS - 400 && elapsed >= MIN_RESULT_MS) {
-      return finish(pickWinnerByCount());
-    }
-
-    rafId = requestAnimationFrame(tick);
-  }
-
-  rafId = requestAnimationFrame(tick);
-}
-
 /* ---------------- Init ---------------- */
 async function init() {
   championGrid.innerHTML = `<div style="opacity:.75;padding:10px;">Loading champions…</div>`;
@@ -1081,13 +891,7 @@ async function init() {
     history.replaceState(null, "", location.pathname);
   });
 
-  // ✅ New build starter DVD YES/NO. YES => reroll()
-  btnReroll.addEventListener("click", () => {
-    startYesNoDVD(
-      () => reroll(),
-      () => {}
-    );
-  });
+  btnReroll.addEventListener("click", reroll);
 
   btnCopyText.addEventListener("click", copyText);
   btnCopyLink.addEventListener("click", copyLink);
@@ -1112,3 +916,4 @@ async function init() {
 }
 
 init();
+
