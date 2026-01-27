@@ -124,8 +124,6 @@ const ARENA_ITEM_BLACKLIST = new Set([
   "Twilight's Edge",
   "Twin Mask"
   "Sword of Blossoming Dawn"
-  "Doran's Shield"
-  "Atma's Reckoning"
 ]);
 
 
@@ -1091,5 +1089,6 @@ async function init() {
 }
 
 init();
+
 
 
