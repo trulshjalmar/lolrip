@@ -123,7 +123,6 @@ const ARENA_ITEM_BLACKLIST = new Set([
   "Turbo Chemtank",
   "Twilight's Edge",
   "Twin Mask"
-  "Veigar's Talisman of Ascension"
   "Sword of Blossoming Dawn"
   "Doran's Shield"
   "Atma's Reckoning"
@@ -1092,4 +1091,5 @@ async function init() {
 }
 
 init();
+
 
