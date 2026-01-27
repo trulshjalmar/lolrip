@@ -122,8 +122,8 @@ const ARENA_ITEM_BLACKLIST = new Set([
   "Talisman of Ascension",
   "Turbo Chemtank",
   "Twilight's Edge",
-  "Twin Mask"
-  "Sword of Blossoming Dawn"
+  "Twin Mask",
+  "Sword of Blossoming Dawn",
 ]);
 
 
