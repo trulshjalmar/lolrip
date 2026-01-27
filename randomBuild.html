@@ -1,42 +1,115 @@
 <!doctype html>
-<html lang="no">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Int build generator</title>
+  <title>Int Build Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/randomBuild.css" />
 </head>
 
 <body>
 
   <header class="hero">
-    <div class="heroRow">
-      <span class="skull">💀</span>
-
-      <!-- Klikkbar logo/tittel (hjem) -->
-      <a class="brandLink" href="index.html" aria-label="Home">
+    <div class="heroContainer">
+      <a class="brandLink" href="randomBuild.html" aria-label="Home">
+        <div class="logoMark">
+          <svg class="logoIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <h1 class="heroTitle">League of Intin</h1>
       </a>
-
-      <span class="skull">💀</span>
+      <p class="heroSub">Generate your next legendary int build</p>
     </div>
-
-    <h2 class="heroSub">Int build generator</h2>
   </header>
 
-  <section class="searchWrap">
-    <div class="searchBar">
-      <span class="searchIcon">🔍</span>
-      <input id="search" type="text" placeholder="Search for a champion..." autocomplete="off" />
-    </div>
+  <section class="searchSection">
+    <div class="searchContainer">
+      <!-- Advanced Mode -->
+      <div class="advancedMode">
+        <div class="modeHeader">
+          <span class="modeLabel">Game Mode: <strong id="currentMode">Normals</strong></span>
+          <button class="advancedToggle" id="advancedToggle">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+              <path d="M10 6V14M6 10H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Advanced
+          </button>
+        </div>
 
-    <div class="laneFilters" id="laneFilters">
-      <button class="laneBtn active" data-lane="ALL">All</button>
-      <button class="laneBtn" data-lane="TOP">Top</button>
-      <button class="laneBtn" data-lane="JUNGLE">Jungle</button>
-      <button class="laneBtn" data-lane="MID">Mid</button>
-      <button class="laneBtn" data-lane="ADC">ADC</button>
-      <button class="laneBtn" data-lane="SUPPORT">Support</button>
+        <!-- Advanced Options (hidden by default) -->
+        <div class="advancedOptions hidden" id="advancedOptions">
+          <!-- Game Mode Selector -->
+          <div class="optionGroup">
+            <span class="optionLabel">Select Mode</span>
+            <div class="modeSelector" id="modeSelector">
+              <button class="modeBtn active" data-mode="NORMALS">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 2L2 7L10 12L18 7L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  <path d="M2 13L10 18L18 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Normals
+              </button>
+              <button class="modeBtn" data-mode="ARAM">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="M4 10L10 4L16 10L10 16L4 10Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+                ARAM
+              </button>
+              <button class="modeBtn" data-mode="ARUF">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="6" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M10 7V10L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                ARUF
+              </button>
+            </div>
+          </div>
+
+          <!-- Role Options -->
+          <div class="optionGroup">
+            <span class="optionLabel">Role Options</span>
+            <div class="roleToggles">
+              <label class="checkboxLabel">
+                <input type="checkbox" id="jungleToggle" class="checkbox" />
+                <svg class="checkmark" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <path d="M5 10L8.5 13.5L15 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Jungle (Smite + Jungle Pet)</span>
+              </label>
+              <label class="checkboxLabel">
+                <input type="checkbox" id="supportToggle" class="checkbox" />
+                <svg class="checkmark" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <path d="M5 10L8.5 13.5L15 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Support (World Atlas)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="searchBar">
+        <svg class="searchIcon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input id="search" type="text" placeholder="Search champions..." autocomplete="off" />
+      </div>
+
+      <div class="laneFilters" id="laneFilters">
+        <button class="laneBtn active" data-lane="ALL">All</button>
+        <button class="laneBtn" data-lane="TOP">Top</button>
+        <button class="laneBtn" data-lane="JUNGLE">Jungle</button>
+        <button class="laneBtn" data-lane="MID">Mid</button>
+        <button class="laneBtn" data-lane="ADC">ADC</button>
+        <button class="laneBtn" data-lane="SUPPORT">Support</button>
+      </div>
     </div>
   </section>
 
@@ -51,46 +124,57 @@
     <!-- BUILD -->
     <section id="pageBuild" class="page hidden">
       <div class="buildTop">
-        <button id="btnBack" class="btn ghost">← Back</button>
+        <button id="btnBack" class="btn btnGhost">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M12 16L6 10L12 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back
+        </button>
 
         <div class="chosenChamp">
           <img id="champImg" class="champImg" alt="" />
-          <div>
+          <div class="champInfo">
             <h3 id="champName" class="champName">Champion</h3>
             <p id="champMeta" class="champMeta"></p>
           </div>
         </div>
       </div>
 
-      <section class="buildCard">
+      <div class="buildCard">
         <div class="buildHeader">
           <h3 id="buildName" class="buildName"></h3>
-          <button id="btnReroll" class="btn primary">🔀 New build</button>
+          <button id="btnReroll" class="btn btnPrimary">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C8.34315 16 6.84315 15.3284 5.75736 14.2426" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M4 14L4 10L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            New build
+          </button>
         </div>
 
         <div class="section">
-          <h4>Items</h4>
+          <h4 class="sectionTitle">Items</h4>
           <div id="itemGrid" class="itemGrid"></div>
         </div>
 
-        <div class="section split">
+        <div class="runesSection">
           <div class="runeCard">
-            <h4>Primary</h4>
+            <h4 class="sectionTitle">Primary Runes</h4>
             <div class="runeBlock">
-              <div class="runeLine">
-                <img id="primaryStyleIcon" class="runeIconBig" alt="" />
-                <span id="primaryStyleName" class="miniLabel"></span>
+              <div class="runeTreeHeader">
+                <img id="primaryStyleIcon" class="runeTreeIcon" alt="" />
+                <span id="primaryStyleName" class="runeTreeName"></span>
               </div>
               <div id="primaryRunes" class="runeGrid"></div>
             </div>
           </div>
 
           <div class="runeCard">
-            <h4>Secondary</h4>
+            <h4 class="sectionTitle">Secondary Runes</h4>
             <div class="runeBlock">
-              <div class="runeLine">
-                <img id="secondaryStyleIcon" class="runeIconBig" alt="" />
-                <span id="secondaryStyleName" class="miniLabel"></span>
+              <div class="runeTreeHeader">
+                <img id="secondaryStyleIcon" class="runeTreeIcon" alt="" />
+                <span id="secondaryStyleName" class="runeTreeName"></span>
               </div>
               <div id="secondaryRunes" class="runeGrid"></div>
             </div>
@@ -98,25 +182,42 @@
         </div>
 
         <div class="section">
-          <h4>Summoner Spells</h4>
+          <h4 class="sectionTitle">Summoner Spells</h4>
           <div id="summoners" class="summoners"></div>
         </div>
 
         <div class="actions">
           <div class="actionRow">
-            <button id="btnCopyText" class="btn ghost">📋 Copy text</button>
-            <button id="btnCopyLink" class="btn ghost">🔗 Copy link</button>
-            <button id="btnPreview" class="btn ghost">🖼️ PNG preview</button>
+            <button id="btnCopyText" class="btn btnGhost">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <rect x="6" y="6" width="10" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M4 14V4C4 2.89543 4.89543 2 6 2H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Copy text
+            </button>
+            <button id="btnCopyLink" class="btn btnGhost">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <path d="M10 6H7C5.34315 6 4 7.34315 4 9V9C4 10.6569 5.34315 12 7 12H8M10 14H13C14.6569 14 16 12.6569 16 11V11C16 9.34315 14.6569 8 13 8H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Copy link
+            </button>
+            <button id="btnPreview" class="btn btnGhost">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 1V4M13 1V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              PNG preview
+            </button>
           </div>
 
           <pre id="sharePreview" class="sharePreview hidden"></pre>
         </div>
-      </section>
+      </div>
     </section>
   </main>
 
   <footer class="disclaimer">
-    ⚠️ Disclaimer: Use these builds at your own risk.
+    <p>⚠️ Disclaimer: Use these builds at your own risk. For educational purposes only.</p>
   </footer>
 
   <!-- MODAL -->
@@ -124,37 +225,51 @@
     <div id="modalBackdrop" class="modalBackdrop"></div>
 
     <div class="modalCard">
-      <div class="modalTop">
-        <strong>Share preview (PNG)</strong>
-        <button id="btnCloseModal" class="btn ghost">✖ Close</button>
+      <div class="modalHeader">
+        <h3 class="modalTitle">Share preview</h3>
+        <button id="btnCloseModal" class="btn btnGhost btnIcon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 5L15 15M5 15L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
       </div>
 
       <img id="previewImg" class="previewImg" alt="PNG preview" />
 
       <div class="modalActions">
-        <button id="btnDownloadPNG" class="btn primary">⬇️ Download PNG</button>
-        <button id="btnCopyPNG" class="btn ghost">📋 Copy PNG</button>
+        <button id="btnDownloadPNG" class="btn btnPrimary">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+            <path d="M10 3V13M10 13L14 9M10 13L6 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 17H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Download PNG
+        </button>
+        <button id="btnCopyPNG" class="btn btnGhost">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+            <rect x="6" y="6" width="10" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M4 14V4C4 2.89543 4.89543 2 6 2H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Copy PNG
+        </button>
       </div>
 
       <p id="previewHint" class="previewHint"></p>
     </div>
   </section>
 
-  <!-- ✅ DVD YES/NO DECISION OVERLAY (SMALL BOX, NOT FULLSCREEN) -->
+  <!-- DECISION OVERLAY -->
   <div id="decisionOverlay" class="decisionOverlay hidden" aria-hidden="true">
     <div class="decisionCard" role="dialog" aria-modal="true" aria-label="YES/NO decision">
       <div class="decisionHud">
         <div class="decisionTitle" id="decisionTitle">Rolling...</div>
         <div class="decisionSub" id="decisionSub">YES vs NO</div>
       </div>
-
-      <!-- Stage / arena for the DVD boxes -->
       <div class="decisionStage" id="decisionStage"></div>
-
       <div class="decisionHint">Auto-resolves in ≤ 4s</div>
     </div>
   </div>
 
+  <script src="js/advancedMode.js"></script>
   <script src="js/randomBuild.js"></script>
 </body>
 </html>

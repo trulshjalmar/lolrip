@@ -9,6 +9,8 @@
    - PNG preview modal + download + copy PNG (if supported)
 */
 
+console.log("randomBuild.js blacklist build loaded");
+
 const el = (id) => document.getElementById(id);
 
 const pageSelect = el("pageSelect");
@@ -70,6 +72,60 @@ const flavorNames = [
   "Turbo Negative Gaming"
 ];
 
+
+// 🚫 Arena / Prismatic / special-mode items that appear in Data Dragon but are not obtainable in normal League (SR/ARAM)
+const ARENA_ITEM_BLACKLIST = new Set([
+  "Hexbolt Companion",
+  "Innervating Locket",
+  "Kinkou Jitte",
+  "Lightning Rod",
+  "Mirage Blade",
+  "Moonflair Spellblade",
+  "Night Harvester",
+  "Prowler's Claw",
+  "Puppeteer",
+  "Pyromancer's Cloak",
+  "Radiant Virtue",
+  "Reality Fracture",
+  "Reaper's Toll",
+  "Regicide",
+  "Reverberation",
+  "Black Hole Gauntlet",
+  "Cloak of Starry Night",
+  "Crown of the Shattered Queen",
+  "Cruelty",
+  "Darksteel Talons",
+  "Decapitator",
+  "Demon King's Crown",
+  "Demonic Embrace",
+  "Detonation Orb",
+  "Diamond-Tipped Spear",
+  "Divine Sunderer",
+  "Dragonheart",
+  "Duskblade of Draktharr",
+  "Eleisa's Miracle",
+  "Empyrean Promise",
+  "Everfrost",
+  "Flesheater",
+  "Force of Entropy",
+  "Fulmination",
+  "Galeforce",
+  "Gambler's Blade",
+  "Gargoyle Stoneplate",
+  "Goredrinker",
+  "Hamstringer",
+  "Hemomancer's Helm",
+  "Runecarver",
+  "Sanguine Gift",
+  "Shield of Molten Stone",
+  "Sword of the Divine",
+  "Talisman of Ascension",
+  "Turbo Chemtank",
+  "Twilight's Edge",
+  "Twin Mask"
+]);
+
+
 let ddragonVersion = null;
 let champions = [];
 let items = [];
@@ -77,6 +133,9 @@ let boots = [];
 let spells = [];
 let runeStyles = [];
 let keystones = [];
+
+let junglePets = [];
+let supportQuestItem = null;
 
 let currentChampion = null;
 let currentBuild = null;
@@ -124,10 +183,28 @@ function roleToEmoji(role) {
 }
 
 /* ---------------- Data filters ---------------- */
+
+// Boots we allow in SR builds (used both for filtering and as a fallback pool)
+const ALLOWED_BOOT_NAMES = new Set([
+  "Berserker's Greaves",
+  "Boots of Swiftness",
+  "Ionian Boots of Lucidity",
+  "Mercury's Treads",
+  "Plated Steelcaps",
+  "Sorcerer's Shoes"
+]);
+
 function isSummonersRiftItem(it) {
+  // Allow items by default unless explicitly disabled for SR.
+  // Data Dragon isn't perfectly consistent about always providing a maps object.
   if (it.maps && it.maps["11"] === false) return false;
+
+  // Explicitly disallow Arena map (30) if present
+  if (it.maps && it.maps["30"] === true) return false;
+
   return true;
 }
+
 
 function isValidFinalItem(it) {
   if (!it.gold || !it.gold.purchasable) return false;
@@ -136,8 +213,27 @@ function isValidFinalItem(it) {
   if (it.inStore === false) return false;
   if (it.requiredChampion) return false;
 
+  // 🚫 Hard blacklist for Arena/Prismatic special items
+  if (ARENA_ITEM_BLACKLIST.has(it.name)) return false;
+
+  // 🚫 Exclude Arena / special-acquisition items that can sneak into Data Dragon
+  if (it.requiredAlly) return false;
+  if (it.requiredBuffCurrencyName) return false;
+  if (it.specialRecipe) return false;
+
+  const desc = (it.description || "").toLowerCase();
+  // Common Arena / Anvil / Prismatic markers (robust, not a name blacklist)
+  if (desc.includes("arena") || desc.includes("anvil") || desc.includes("prismatic")) return false;
+
+
   const tags = it.tags || [];
   if (tags.includes("Consumable") || tags.includes("Trinket")) return false;
+  if (tags.includes("Boots")) return false;
+
+  // 🚫 Prevent "double boots": some boots-like items (e.g. Arena upgrades) may lack the Boots tag
+  const lowerName = (it.name || "").toLowerCase();
+  const bootWords = ["boots", "treads", "greaves", "shoes", "steelcaps", "swiftness", "lucidity"];
+  if (bootWords.some(w => lowerName.includes(w))) return false;
 
   // Avoid components
   if (typeof it.depth === "number" && it.depth < 3) return false;
@@ -176,6 +272,9 @@ function isValidFinalBoots(it) {
   if (Array.isArray(it.into) && it.into.length > 0) return false;
   if (typeof it.depth === "number" && it.depth < 2) return false;
 
+  // ✅ Only allow real SR boots we want
+  if (!ALLOWED_BOOT_NAMES.has(it.name)) return false;
+
   return true;
 }
 
@@ -201,6 +300,29 @@ async function bootDataDragon() {
 
   const rawItems = Object.entries(itemJson.data).map(([id, it]) => ({ id, ...it }));
 
+  // Keep quest items separately so they only appear when toggled in Advanced Mode
+  const petNames = new Set(["Gustwalker Hatchling", "Mosstomper Seedling", "Scorchclaw Pup"]);
+  junglePets = rawItems
+    .filter(it => petNames.has(it.name))
+    .map(it => ({
+      id: it.id,
+      name: it.name,
+      icon: `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${it.image.full}`,
+      tags: it.tags || [],
+      stats: it.stats || {}
+    }));
+
+  supportQuestItem = rawItems
+    .filter(it => it.name === "World Atlas")
+    .map(it => ({
+      id: it.id,
+      name: it.name,
+      icon: `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${it.image.full}`,
+      tags: it.tags || [],
+      stats: it.stats || {}
+    }))[0] || null;
+
+
   boots = rawItems
     .filter(isValidFinalBoots)
     .map(it => ({
@@ -210,6 +332,20 @@ async function bootDataDragon() {
       tags: it.tags || [],
       stats: it.stats || {}
     }));
+
+  // Fallback: if Data Dragon metadata filtering ever yields no boots,
+  // build the boots pool purely by name.
+  if (!boots.length) {
+    boots = rawItems
+      .filter(it => ALLOWED_BOOT_NAMES.has(it.name))
+      .map(it => ({
+        id: it.id,
+        name: it.name,
+        icon: `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${it.image.full}`,
+        tags: it.tags || [],
+        stats: it.stats || {}
+      }));
+  }
 
   items = rawItems
     .filter(it => !(it.tags || []).includes("Boots"))
@@ -232,7 +368,8 @@ async function bootDataDragon() {
     "SummonerBoost",
     "SummonerExhaust",
     "SummonerSmite",
-    "SummonerSnowball"
+    "SummonerSnowball",
+    "SummonerMana"
   ]);
 
   spells = Object.values(spellJson.data)
@@ -352,22 +489,38 @@ function generateItems(champ) {
   const anyPool = shuffleCopy(categorized);
 
   const picked = [];
-  const needRelevant = 3;
+
+  // We always want 5 non-boots items + 1 boots = 6 total slots.
+  // If Jungle/Support is toggled, we force exactly one quest item and fill the rest with normal items.
+  const wantQuest = (window.isJungle && junglePets.length) || (window.isSupport && supportQuestItem);
+  const targetNonBoots = 5;
+
+  if (window.isJungle && junglePets.length) {
+    const pet = pickRandom(junglePets);
+    if (pet) picked.push({ ...pet, isBoots: false, isQuest: true });
+  } else if (window.isSupport && supportQuestItem) {
+    picked.push({ ...supportQuestItem, isBoots: false, isQuest: true });
+  }
+
+  const needRelevant = wantQuest ? 2 : Math.min(3, targetNonBoots);
 
   for (const it of prefPool) {
     if (picked.length >= needRelevant) break;
-    if (!picked.some(x => x.id === it.id)) picked.push(it);
+    if (!picked.some(x => x.id === it.id || x.name === it.name)) picked.push(it);
   }
 
-  while (picked.length < 5) {
+  while (picked.length < targetNonBoots) {
     const it = pickRandom(anyPool);
-    if (picked.some(x => x.id === it.id)) continue;
+    if (!it) continue;
+    if (picked.some(x => x.id === it.id || x.name === it.name)) continue;
     picked.push(it);
   }
 
   const boot = boots.length ? pickRandom(boots) : null;
+
   const result = picked.map(it => ({ ...it, isBoots: false }));
   if (boot) result.push({ ...boot, isBoots: true });
+
   return result;
 }
 
@@ -415,10 +568,29 @@ function generateRunes() {
 
 function generateSummoners() {
   if (spells.length < 2) return [];
-  const a = pickRandom(spells);
-  let b = pickRandom(spells);
-  while (b.id === a.id) b = pickRandom(spells);
-  return [a, b];
+
+  // ARAM restrictions
+  const base = window.isARAM
+    ? spells.filter(s => s.name !== "Teleport")
+    : spells.slice();
+
+  // Jungle: always force Smite + one random (not Smite)
+  if (window.isJungle) {
+    const smite = base.find(s => s.name === "Smite");
+    const others = base.filter(s => s.name !== "Smite");
+    if (!smite || others.length < 1) return [];
+    return [smite, pickRandom(others)];
+  }
+
+  // Non-jungle: never include Smite
+  const pool = base.filter(s => s.name !== "Smite");
+  if (pool.length < 2) return [];
+
+  const a = pickRandom(pool);
+  let b = pickRandom(pool);
+  while (b && a && b.id === a.id) b = pickRandom(pool);
+
+  return [a, b].filter(Boolean);
 }
 
 function generateBuild(champ) {
@@ -916,4 +1088,3 @@ async function init() {
 }
 
 init();
-
